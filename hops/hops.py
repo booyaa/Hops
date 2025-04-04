@@ -11,40 +11,77 @@ class Hops:
     to execute the command if possible with replies going back to the `client`.
     """
 
+    prefix = '.'
+
     synonyms = {
         '👋🏼': 'hello',
     }
 
-    def on_message(self, sender: str, to: str, rx_id: str, message: str, client: Client) -> None:
+    def on_message(
+        self,
+        from_id: str,
+        channel_index: str,
+        rx_id: str,
+        message: str,
+        client: Client
+    ) -> None:
         """
         Handler for incoming messages
         """
         split = message.split(' ', 2)
+
         command = split[0]
+
+        # Require that the command be prefixed with by '.'
+        if not command.startswith(self.prefix):
+            return
+        command = command[1:]
+
+        # Map synonyms to canonical names
         command = self.synonyms[command] if command in self.synonyms else command
 
         method_name = f'_on_{command.lower()}'
         if hasattr(self, method_name):
-
             method = getattr(self, method_name)
             if callable(method):
                 arguments = split[1] if len(split) > 1 else None
                 logging.debug('Received %s', command)
-                method(sender, to, rx_id, arguments, client)
+                method(from_id, channel_index, rx_id, arguments, client)
 
-    def _on_hello(self, _sender: str, _to: str, _rx_id: str, _argument: str, client: Client) -> None:
+    def _on_hello(
+        self,
+        _sender: str,
+        channel_index: str,
+        _rx_id: str,
+        _argument: str,
+        client: Client
+    ) -> None:
         """
         Say hello
         """
-        client.send_text('👋🏼')
+        client.send_text('👋🏼', channel_index = channel_index)
 
-    def _on_ping(self, _sender: str, _to: str, _rx_id: str, _argument: str, client: Client) -> None:
+    def _on_ping(
+        self,
+        _sender: str,
+        channel_index: str,
+        _rx_id: str,
+        _argument: str,
+        client: Client
+    ) -> None:
         """
         Respond to a ping
         """
-        client.send_text('ack')
+        client.send_text('ack', channel_index = channel_index)
 
-    def _on_weather(self, _sender: str, _to: str, _rx_id: str, _argument: str, _client: Client) -> None:
+    def _on_weather(
+        self,
+        _sender: str,
+        _channel_id: str,
+        _rx_id: str,
+        _argument: str,
+        _client: Client
+    ) -> None:
         """
         Get the weather
         """

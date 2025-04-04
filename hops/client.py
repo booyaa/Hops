@@ -6,9 +6,9 @@ callback methods to handle these events, such as connection establishment, data
 reception, node updates, position updates, text messages, and user updates.
 """
 import logging
-from typing import Union
+# from typing import Union
 from pubsub import pub
-import meshtastic
+# import meshtastic
 from meshtastic.stream_interface import StreamInterface
 # from meshtastic.protobuf import portnums_pb2
 from .util import get_or_else
@@ -25,18 +25,19 @@ class Client:
         self.nodes = {}
 
         pub.subscribe(self._event_connect,    'meshtastic.connection.established')
-        # pub.subscribe(self._event_data,       'meshtastic.receive.data.portnum')
         pub.subscribe(self._event_disconnect, 'meshtastic.connection.lost')
         pub.subscribe(self._event_node,       'meshtastic.node')
-        # pub.subscribe(self._event_position,   'meshtastic.receive.position')
         pub.subscribe(self._event_text,       'meshtastic.receive.text')
+        # pub.subscribe(self._event_position,   'meshtastic.receive.position')
+        # pub.subscribe(self._event_data,       'meshtastic.receive.data.portnum')
         # pub.subscribe(self._event_user,       'meshtastic.receive.user')
         # pub.subscribe(self._event_store_forward,       'meshtastic.receive.storeForward')
 
     def send_text(
         self,
         text: str,
-        destination_id: Union[int, str] = meshtastic.BROADCAST_ADDR,
+        channel_index: str,
+        # destination_id: Union[int, str] = meshtastic.BROADCAST_ADDR,
     ):
         """
         Send a message
@@ -44,9 +45,10 @@ class Client:
 
         self.interface.sendText(
             text,
-            destination_id = destination_id,
-            wantAck=False,
-            wantResponse=False,
+            channelIndex = channel_index,
+            # destination_id = destination_id,
+            # wantAck=False,
+            # wantResponse=False,
         )
 
     def _event_connect(self, _interface, _topic=pub.AUTO_TOPIC):
@@ -61,15 +63,6 @@ class Client:
             self.me["user"]["longName"],
             self.me["user"]["hwModel"]
         )
-
-    def _event_data(self, packet: dict, _interface):
-        '''
-        Callback function for data updates
-
-        :param packet: Data information
-        :param interface: Meshtastic interface
-        '''
-        logging.info('Data update: %s', packet)
 
     def _event_disconnect(self, _interface, _topic=pub.AUTO_TOPIC):
         '''
@@ -89,23 +82,6 @@ class Client:
         :param node: Node information
         '''
 
-    def _event_position(self, packet: dict, interface):
-        '''
-        Callback function for position updates
-
-        :param packet: Position information
-        :param interface: Meshtastic interface
-        '''
-        # sender = get_or_else(packet, ['from'])
-        # msg = get_or_else(packet, ['decoded', 'payload'], '').hex()
-        # sender_id = get_or_else(self.nodes[sender], ['user', 'id']) if sender in self.nodes else '!unk'
-        # name = get_or_else(self.nodes[sender], ['user', 'longName']) if sender in self.nodes else 'UNK'
-        # longitude = get_or_else(packet, ['decoded', 'position', 'longitudeI'], 0) / 1e7
-        # latitude = get_or_else(packet, ['decoded', 'position', 'latitudeI'], 0) / 1e7
-        # altitude = get_or_else(packet, ['decoded', 'position', 'altitude'])
-        # snr = get_or_else(packet, ['rxSnr'])
-        # rssi = get_or_else(packet, ['rxRssi'])
-
     def _event_text(self, packet: dict, _interface):
         '''
         Callback function for received packets
@@ -114,19 +90,9 @@ class Client:
         '''
 
         sender = get_or_else(packet, ['from'])
-        to = get_or_else(packet, ['to'])
+        # to = get_or_else(packet, ['to'])
         msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
-        rx_id = get_or_else(packet, ['decoded', 'id'])
+        rx_id = get_or_else(packet, ['id'])
+        channel_index = get_or_else(packet, ['channel'])
 
-        # sender_id = get_or_else(self.nodes[sender], ['user', 'id']) if sender in self.nodes else '!unk'
-        # channel_id = get_or_else(packet, ['channel'])
-
-        self.hops.on_message(sender, to, rx_id, msg, self)
-
-
-    def _event_user(self, packet: dict, interface):
-        '''
-        Callback function for user updates
-
-        :param user: User information
-        '''
+        self.hops.on_message(sender, channel_index, rx_id, msg, self)
