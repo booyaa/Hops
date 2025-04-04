@@ -15,12 +15,16 @@ class Hops:
 
     synonyms = {
         '👋🏼': 'hello',
+        'info': 'help',
+        '?': 'help',
+        '!': 'help',
+        '🤨': 'help',
     }
 
     def on_message(
         self,
         from_id: str,
-        channel_index: str,
+        channel_index: int,
         rx_id: str,
         message: str,
         client: Client
@@ -51,7 +55,7 @@ class Hops:
     def _on_hello(
         self,
         _sender: str,
-        channel_index: str,
+        channel_index: int,
         _rx_id: str,
         _argument: str,
         client: Client
@@ -64,7 +68,7 @@ class Hops:
     def _on_ping(
         self,
         _sender: str,
-        channel_index: str,
+        channel_index: int,
         _rx_id: str,
         _argument: str,
         client: Client
@@ -73,6 +77,19 @@ class Hops:
         Respond to a ping
         """
         client.send_text('ack', channel_index = channel_index)
+    
+    def _on_help(
+        self,
+        _sender: str,
+        channel_index: int,
+        _rx_id: str,
+        _argument: str,
+        client: Client
+    ) -> None:
+        """
+        Provide help info
+        """
+        client.send_text('http://w2asm.com/hops', channel_index = channel_index)
 
     def _on_weather(
         self,

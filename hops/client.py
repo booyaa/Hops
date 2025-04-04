@@ -51,20 +51,21 @@ class Client:
             # wantResponse=False,
         )
 
-    def _event_connect(self, _interface, _topic=pub.AUTO_TOPIC):
+    def _event_connect(self, interface):
         '''
         Callback function for connection established
 
         :param interface: Meshtastic interface
         :param topic:     PubSub topic
         '''
-        logging.info(
-            'Connected to the %s radio on %s hardware',
-            self.me["user"]["longName"],
-            self.me["user"]["hwModel"]
-        )
+        # logging.info(
+        #     'Connected to the %s radio on %s hardware',
+        #     self.me["user"]["longName"],
+        #     self.me["user"]["hwModel"]
+        # )
+        logging.info('Connected')
 
-    def _event_disconnect(self, _interface, _topic=pub.AUTO_TOPIC):
+    def _event_disconnect(self, interface, topic=pub.AUTO_TOPIC):
         '''
         Callback function for connection lost
 
@@ -82,16 +83,15 @@ class Client:
         :param node: Node information
         '''
 
-    def _event_text(self, packet: dict, _interface):
+    def _event_text(self, packet: dict, interface):
         '''
         Callback function for received packets
 
         :param packet: Packet received
         '''
-
         sender = get_or_else(packet, ['from'])
-        # to = get_or_else(packet, ['to'])
         msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
+        # portnum = get_or_else(packet, ['decoded', 'portnum'])
         rx_id = get_or_else(packet, ['id'])
         channel_index = get_or_else(packet, ['channel'])
 
