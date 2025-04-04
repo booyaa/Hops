@@ -1,0 +1,5 @@
+.venv
+build/
+hops.egg-info/
+hops/__pycache__
+tests/__pycache__/
