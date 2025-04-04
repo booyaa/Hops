@@ -15,7 +15,7 @@ class Hops:
         '👋🏼': 'hello',
     }
 
-    def on_message(self, message: str, sender: str, to: str, client: Client) -> None:
+    def on_message(self, sender: str, to: str, rx_id: str, message: str, client: Client) -> None:
         """
         Handler for incoming messages
         """
@@ -30,15 +30,21 @@ class Hops:
             if callable(method):
                 arguments = split[1] if len(split) > 1 else None
                 logging.debug('Received %s', command)
-                method(sender, to, arguments, client)
+                method(sender, to, rx_id, arguments, client)
 
-    def _on_hello(self, _sender: str, _to: str, _argument: str, client: Client) -> None:
+    def _on_hello(self, _sender: str, _to: str, _rx_id: str, _argument: str, client: Client) -> None:
         """
         Say hello
         """
         client.send_text('👋🏼')
 
-    def _on_weather(self, _sender: str, _to: str, _argument: str, _client: Client) -> None:
+    def _on_ping(self, _sender: str, _to: str, _rx_id: str, _argument: str, client: Client) -> None:
+        """
+        Respond to a ping
+        """
+        client.send_text('ack')
+
+    def _on_weather(self, _sender: str, _to: str, _rx_id: str, _argument: str, _client: Client) -> None:
         """
         Get the weather
         """

@@ -25,34 +25,28 @@ class Client:
         self.nodes = {}
 
         pub.subscribe(self._event_connect,    'meshtastic.connection.established')
-        pub.subscribe(self._event_data,       'meshtastic.receive.data.portnum')
+        # pub.subscribe(self._event_data,       'meshtastic.receive.data.portnum')
         pub.subscribe(self._event_disconnect, 'meshtastic.connection.lost')
         pub.subscribe(self._event_node,       'meshtastic.node')
-        pub.subscribe(self._event_position,   'meshtastic.receive.position')
+        # pub.subscribe(self._event_position,   'meshtastic.receive.position')
         pub.subscribe(self._event_text,       'meshtastic.receive.text')
-        pub.subscribe(self._event_user,       'meshtastic.receive.user')
+        # pub.subscribe(self._event_user,       'meshtastic.receive.user')
+        # pub.subscribe(self._event_store_forward,       'meshtastic.receive.storeForward')
 
     def send_text(
         self,
         text: str,
         destination_id: Union[int, str] = meshtastic.BROADCAST_ADDR,
-        channel_index: int = 0,
-        # port_num: portnums_pb2.P8ortNum.ValueType = portnums_pb2.PortNum.TEXT_MESSAGE_APP
     ):
         """
         Send a message
         """
 
-        port_num = 0
-
         self.interface.sendText(
             text,
-            destination_id,
-            wantAck = False,
-            wantResponse = False,
-            onResponse = None,
-            channelIndex = channel_index,
-            portNum = port_num,
+            destination_id = destination_id,
+            wantAck=False,
+            wantResponse=False,
         )
 
     def _event_connect(self, _interface, _topic=pub.AUTO_TOPIC):
@@ -122,10 +116,12 @@ class Client:
         sender = get_or_else(packet, ['from'])
         to = get_or_else(packet, ['to'])
         msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
+        rx_id = get_or_else(packet, ['decoded', 'id'])
+
         # sender_id = get_or_else(self.nodes[sender], ['user', 'id']) if sender in self.nodes else '!unk'
         # channel_id = get_or_else(packet, ['channel'])
 
-        self.hops.on_message(sender, to, msg, self)
+        self.hops.on_message(sender, to, rx_id, msg, self)
 
 
     def _event_user(self, packet: dict, interface):
