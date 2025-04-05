@@ -42,7 +42,6 @@ class Client:
         """
         Send a message
         """
-        
         destination_id = destination_id if destination_id is None else meshtastic.BROADCAST_ADDR
         destination_id = destination_id if channel_index is None else meshtastic.BROADCAST_ADDR
 

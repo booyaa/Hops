@@ -30,7 +30,7 @@ class TestHops(unittest.TestCase):
             message = '.hello',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with('👋🏼', channel_index = self.channel_index)
+        self.client.send_text.assert_called_once_with('👋', channel_index = self.channel_index, destination_id=self.from_id)
 
     def test_on_message_hello_synonym(self):
         """
@@ -43,7 +43,7 @@ class TestHops(unittest.TestCase):
             message = '.👋🏼',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with('👋🏼', channel_index = self.channel_index)
+        self.client.send_text.assert_called_once_with('👋', channel_index = self.channel_index, destination_id=self.from_id)
 
     def test_on_message_no_prefix(self):
         """
