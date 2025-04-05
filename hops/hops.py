@@ -2,7 +2,8 @@
 Bot
 """
 import logging
-import argparse
+# import argparse
+from typing import Optional
 from .client import Client
 
 class Hops:
@@ -14,7 +15,12 @@ class Hops:
     prefix = '.'
 
     synonyms = {
+        '👋': 'hello',
+        '👋🏻': 'hello',
         '👋🏼': 'hello',
+        '👋🏽': 'hello',
+        '👋🏾': 'hello',
+        '👋🏿': 'hello',
         'info': 'help',
         '?': 'help',
         '!': 'help',
@@ -23,8 +29,8 @@ class Hops:
 
     def on_message(
         self,
-        from_id: str,
-        channel_index: int,
+        from_id: Optional[str],
+        channel_index: Optional[int],
         rx_id: str,
         message: str,
         client: Client
@@ -54,8 +60,8 @@ class Hops:
 
     def _on_hello(
         self,
-        _sender: str,
-        channel_index: int,
+        from_id: Optional[str],
+        channel_index: Optional[int],
         _rx_id: str,
         _argument: str,
         client: Client
@@ -63,12 +69,16 @@ class Hops:
         """
         Say hello
         """
-        client.send_text('👋🏼', channel_index = channel_index)
+        client.send_text(
+            '👋',
+            channel_index = channel_index,
+            destination_id = from_id
+        )
 
     def _on_ping(
         self,
-        _sender: str,
-        channel_index: int,
+        from_id: Optional[str],
+        channel_index: Optional[int],
         _rx_id: str,
         _argument: str,
         client: Client
@@ -76,12 +86,16 @@ class Hops:
         """
         Respond to a ping
         """
-        client.send_text('ack', channel_index = channel_index)
-    
+        client.send_text(
+            'ack',
+            channel_index = channel_index,
+            destination_id = from_id,
+        )
+
     def _on_help(
         self,
-        _sender: str,
-        channel_index: int,
+        from_id: Optional[str],
+        channel_index: Optional[int],
         _rx_id: str,
         _argument: str,
         client: Client
@@ -89,18 +103,22 @@ class Hops:
         """
         Provide help info
         """
-        client.send_text('http://w2asm.com/hops', channel_index = channel_index)
+        client.send_text(
+            'http://w2asm.com/hops',
+            channel_index = channel_index,
+            destination_id = from_id
+        )
 
-    def _on_weather(
-        self,
-        _sender: str,
-        _channel_id: str,
-        _rx_id: str,
-        _argument: str,
-        _client: Client
-    ) -> None:
-        """
-        Get the weather
-        """
-        parser = argparse.ArgumentParser(description="Get the weather")
-        _args = parser.parse_args()
+    # def _on_weather(
+    #     self,
+    #     _from_id: Optional[str],
+    #     _channel_index: Optional[int],
+    #     _rx_id: str,
+    #     _argument: str,
+    #     _client: Client
+    # ) -> None:
+    #     """
+    #     Get the weather
+    #     """
+    #     parser = argparse.ArgumentParser(description="Get the weather")
+    #     _args = parser.parse_args()

@@ -6,11 +6,11 @@ callback methods to handle these events, such as connection establishment, data
 reception, node updates, position updates, text messages, and user updates.
 """
 import logging
-# from typing import Union
+from typing import Union
+from typing import Optional
 from pubsub import pub
-# import meshtastic
+import meshtastic
 from meshtastic.stream_interface import StreamInterface
-# from meshtastic.protobuf import portnums_pb2
 from .util import get_or_else
 # from .hops import Hops
 
@@ -36,19 +36,22 @@ class Client:
     def send_text(
         self,
         text: str,
-        channel_index: str,
-        # destination_id: Union[int, str] = meshtastic.BROADCAST_ADDR,
+        channel_index: Optional[int],
+        destination_id: Optional[Union[int, str]] = meshtastic.BROADCAST_ADDR,
     ):
         """
         Send a message
         """
+        
+        destination_id = destination_id if destination_id is None else meshtastic.BROADCAST_ADDR
+        destination_id = destination_id if channel_index is None else meshtastic.BROADCAST_ADDR
 
         self.interface.sendText(
             text,
-            channelIndex = channel_index,
-            # destination_id = destination_id,
-            # wantAck=False,
-            # wantResponse=False,
+            channelIndex=channel_index if channel_index is not None else 0,
+            destinationId=destination_id,
+            wantAck=False,
+            wantResponse=False,
         )
 
     def _event_connect(self, interface):
@@ -92,7 +95,8 @@ class Client:
         sender = get_or_else(packet, ['from'])
         msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
         # portnum = get_or_else(packet, ['decoded', 'portnum'])
+        # TEXT_MESSAGE_APP
         rx_id = get_or_else(packet, ['id'])
-        channel_index = get_or_else(packet, ['channel'])
+        channel_index = get_or_else(packet, ['channel'], None)
 
         self.hops.on_message(sender, channel_index, rx_id, msg, self)

@@ -13,7 +13,7 @@ class TestHops(unittest.TestCase):
     def setUp(self):
         self.hops = Hops()
         self.client = MagicMock(spec=Client)
-    
+
     from_id = '1'
     to_id = '2'
     rx_id = '3'
