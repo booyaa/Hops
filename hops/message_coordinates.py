@@ -9,34 +9,26 @@ Represents message coordinates in a communication system.
 Methods:
     from_packet(packet: dict, interface: StreamInterface) -> "Coordinates":
         Creates an instance from a packet dictionary.
-    is_dm() -> bool:
-        Checks if the message is a direct message.
-
 """
-import logging
+
+# import logging
 from typing import Union
 from typing import Optional
 from meshtastic.stream_interface import StreamInterface
 from .util import get_or_else
 
+
 class MessageCoordinates:
     """
     Represents the coordinates of a message in a communication system, including
     details about the sender, receiver, message ID, and channel information.
-    Attributes:
-        from_id (Union[int, str]): The ID of the sender.
-        from_node (Optional[dict]): Additional details about the sender node, if available.
-        to_id (Optional[Union[int, str]]): The ID of the receiver.
-        to_node (Optional[dict]): Additional details about the receiver node, if available.
-        message_id (int): The unique identifier of the message.
-        channel_index (Optional[int]): The index of the channel where the message was sent, if applicable.
     """
 
     def __init__(
         self,
         from_id: Union[int, str],
         from_node: Optional[dict],
-        to_id: Optional[Union[int,str]],
+        to_id: Optional[Union[int, str]],
         to_node: Optional[dict],
         message_id: int,
         channel_index: Optional[int],
@@ -49,7 +41,7 @@ class MessageCoordinates:
         self.message_id = message_id
         self.channel_index = channel_index
         self.is_dm = is_dm
-    
+
     @staticmethod
     def from_packet(packet: dict, interface: StreamInterface) -> "MessageCoordinates":
         """
@@ -58,10 +50,10 @@ class MessageCoordinates:
         :param packet: Packet dictionary containing message details.
         :return: Coordinates instance.
         """
-        from_id = get_or_else(packet, ['from'])
-        to_id = get_or_else(packet, ['to'])
-        message_id = get_or_else(packet, ['id'])
-        channel_index = get_or_else(packet, ['channel'], None)
+        from_id = get_or_else(packet, ["from"])
+        to_id = get_or_else(packet, ["to"])
+        message_id = get_or_else(packet, ["id"])
+        channel_index = get_or_else(packet, ["channel"], None)
 
         from_node = interface.nodes[from_id] if from_id in interface.nodes else None
         to_node = interface.nodes[to_id] if to_id in interface.nodes else None
@@ -77,9 +69,3 @@ class MessageCoordinates:
             channel_index,
             is_dm,
         )
-    
-    def is_dm() -> bool:
-        """
-        Returns true if this was a direct message
-        """
-        return None

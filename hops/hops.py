@@ -88,7 +88,7 @@ class Hops:
         Respond to a ping
         """
         client.send_response(
-            message="ack",
+            message="🏓",
             message_coordinates=coordinates,
         )
 
