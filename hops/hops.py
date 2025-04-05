@@ -174,7 +174,7 @@ class Hops:
         current_message = ""
         for message in messages:
             if len(current_message) + len(message) + 1 <= 200:
-                current_message += f"\n{message}"
+                current_message += f"\n{message}" if current_message else message
             else:
                 concatenated_messages.append(current_message)
                 current_message = message
