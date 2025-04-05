@@ -32,14 +32,6 @@ class Client:
         pub.subscribe(self._event_disconnect, "meshtastic.connection.lost")
         pub.subscribe(self._event_text, "meshtastic.receive.text")
 
-    @staticmethod
-    def num_to_id(num: int) -> str:
-        """
-        Convert the given integer to a meshtastic identifier
-        string.
-        """
-        return "!" + hex(num)[2:]
-
     def send_response(self, message: str, message_coordinates: MessageCoordinates):
         """
         Send a message
@@ -50,10 +42,11 @@ class Client:
         data_packet = Data(
             portnum=PortNum.TEXT_MESSAGE_APP,
             payload=message.encode("utf-8"),
-            reply_id=message_coordinates.message_id,
             emoji=is_emoji,
             want_response=False,
         )
+        if message_coordinates.message_id is not None:
+            data_packet.reply_id = message_coordinates.message_id
 
         mesh_packet = MeshPacket(
             channel=(
@@ -78,19 +71,6 @@ class Client:
             pkiEncrypted=False,
             publicKey=None,
         )
-
-        # self.interface.sendData(
-        #     data=packet,
-        #     destinationId=destination_id,
-        #     portNum=PortNum.TEXT_MESSAGE_APP,
-        #     wantAck=False,
-        #     wantResponse=False,
-        #     channelIndex=(
-        #         message_coordinates.channel_index
-        #         if message_coordinates.channel_index is not None
-        #         else 0
-        #     ),
-        # )
 
     def _event_connect(self, interface: StreamInterface) -> None:
         """
@@ -118,12 +98,6 @@ class Client:
         """
         # Suppress unused error
         _ = interface
-
-        # my_id = '!' + hex(interface.myInfo.my_node_num)[2:]
-        # my_node = interface.nodes[my_id]
-        # my_user = my_node['user']
-        # my_short_name = my_user['shortName']
-        # my_long_name = my_user['longName']
 
         coordinates = MessageCoordinates.from_packet(packet, self.interface)
         message = get_or_else(packet, ["decoded", "payload"], "").decode("utf-8")

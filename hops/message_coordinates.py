@@ -30,7 +30,7 @@ class MessageCoordinates:
         from_node: Optional[dict],
         to_id: Optional[Union[int, str]],
         to_node: Optional[dict],
-        message_id: int,
+        message_id: Optional[int],
         channel_index: Optional[int],
         is_dm: bool,
     ):
@@ -41,6 +41,14 @@ class MessageCoordinates:
         self.message_id = message_id
         self.channel_index = channel_index
         self.is_dm = is_dm
+
+    @staticmethod
+    def num_to_id(num: int) -> str:
+        """
+        Convert the given integer to a meshtastic identifier
+        string.
+        """
+        return "!" + hex(num)[2:]
 
     @staticmethod
     def from_packet(packet: dict, interface: StreamInterface) -> "MessageCoordinates":
@@ -55,8 +63,13 @@ class MessageCoordinates:
         message_id = get_or_else(packet, ["id"])
         channel_index = get_or_else(packet, ["channel"], None)
 
-        from_node = interface.nodes[from_id] if from_id in interface.nodes else None
-        to_node = interface.nodes[to_id] if to_id in interface.nodes else None
+        from_id_str = MessageCoordinates.num_to_id(from_id)
+        to_id_str = MessageCoordinates.num_to_id(to_id)
+
+        from_node = (
+            interface.nodes[from_id_str] if from_id_str in interface.nodes else None
+        )
+        to_node = interface.nodes[to_id_str] if to_id_str in interface.nodes else None
 
         is_dm = to_id == interface.myInfo.my_node_num
 

@@ -3,7 +3,9 @@ Bot
 """
 
 import logging
-import argparse
+
+# import argparse
+import copy
 from typing import Optional
 from .client import Client
 from .storage import Storage
@@ -103,47 +105,59 @@ class Hops:
             message_coordinates=coordinates,
         )
 
-    def _on_bbs(self, coordinates: MessageCoordinates, argument: str, client: Client):
-        parser = argparse.ArgumentParser(description="Bulletin Board System")
-        parser.add_argument("command", choices=["help", "add"], nargs="?", default=None)
-        parser.add_argument("message", nargs=argparse.REMAINDER)
-        args = parser.parse_args(argument.split() if argument else [])
-
-        if args.command == "help":
-            client.send_response(
-                message="http://w2asm.com/hops/bbs/",
-                message_coordinates=coordinates,
-            )
-            return
-
+    def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
         if self.storage is None:
             logging.info("Cannot use BBS without storage")
             return
 
-        if args.command == "add":
-            message = " ".join(args.message if args.message is not None else [])
-            self.storage.bbs_insert(
-                from_id=coordinates.from_id,
-                from_short_name=get_or_else(
-                    coordinates, ["from_node", "user", "shortName"]
-                ),
-                from_long_name=get_or_else(
-                    coordinates, ["from_node", "user", "longName"]
-                ),
-                channel_index=coordinates.channel_index,
-                message=message,
+        self.storage.bbs_insert(
+            from_id=coordinates.from_id,
+            from_short_name=get_or_else(
+                coordinates, ["from_node", "user", "shortName"]
+            ),
+            from_long_name=get_or_else(coordinates, ["from_node", "user", "longName"]),
+            message=argument,
+        )
+        client.send_response(message="💾", message_coordinates=coordinates)
+
+    def _on_bbs(self, coordinates: MessageCoordinates, _argument: str, client: Client):
+        if self.storage is None:
+            logging.info("Cannot use BBS without storage")
+            return
+
+        if not coordinates.is_dm:
+            client.send_response(
+                message="🚫 Only allowed in DM", message_coordinates=coordinates
             )
             return
 
-        rows = self.storage.bbs_read(
-            channel_index=coordinates.channel_index,
-        )
+        new_coordinates = copy.deepcopy(coordinates)
+        new_coordinates.is_dm = True
+        new_coordinates.message_id = None
 
+        rows = self.storage.bbs_read()
+
+        messages = []
         for row in rows[0:5]:
             from_id = (
                 row["from_short_name"]
                 if row["from_short_name"] is not None
                 else row["from_id"]
             )
-            message = f"{from_id}: {row['message']}"
-            client.send_response(message=message, message_coordinates=coordinates)
+            messages.append(f"{from_id}: {row['message']}")
+
+        # Group the messages together into as few messages as possible
+        concatenated_messages = []
+        current_message = ""
+        for message in messages:
+            if len(current_message) + len(message) + 1 <= 200:
+                current_message += f"\n{message}"
+            else:
+                concatenated_messages.append(current_message)
+                current_message = message
+
+        if current_message:
+            concatenated_messages.append(current_message)
+
+        for message in concatenated_messages:
+            client.send_response(message=message, message_coordinates=new_coordinates)
