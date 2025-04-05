@@ -158,13 +158,15 @@ class Hops:
             )
             return
 
-        messages = self.storage.bbs_read(
+        rows = self.storage.bbs_read(
                 channel_index = channel_index,
             )
 
-        for message in messages[0:5]:
+        for row in rows[0:5]:
+            from_id = row['from_short_name'] if row['from_short_name'] is not None else row['from_id']
+            message = f"{from_id}: {row['message']}"
             client.send_text(
                 message,
                 channel_index = channel_index,
-                destination_id =  None,
+                destination_id =  from_id,
             )

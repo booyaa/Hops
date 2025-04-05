@@ -91,7 +91,7 @@ class Storage:
                 INSERT INTO bbs
                     (timestamp, from_id, from_short_name, from_long_name, channel_index, message)
                 VALUES
-                    (?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?)
             ''', (
                     now,
                     from_id,
@@ -115,8 +115,7 @@ class Storage:
                 FROM
                     bbs
                 WHERE
-                    from_id = ?
-                    AND channel_index = ?
+                    channel_index = ?
                     AND timestamp >= datetime(?, '-28 days')
                 LIMIT 5
             ''', (
