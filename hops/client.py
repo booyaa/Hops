@@ -7,11 +7,11 @@ reception, node updates, position updates, text messages, and user updates.
 """
 import sys
 import logging
-# from typing import Union
-# from typing import Optional
 from pubsub import pub
-# import meshtastic
+import meshtastic
 from meshtastic.stream_interface import StreamInterface
+from meshtastic.protobuf.mesh_pb2 import MeshPacket
+from meshtastic.protobuf.portnums_pb2 import PortNum
 from .util import get_or_else
 from .message_coordinates import MessageCoordinates
 
@@ -37,29 +37,34 @@ class Client:
         """
         return '!' + hex(num)[2:]
 
-
     def send_response(
         self,
-        text: str,
+        message: str,
         message_coordinates: MessageCoordinates
     ):
         """
         Send a message
         """
+        packet = MeshPacket(
+            channel = message_coordinates.channel_id,
+            payload = message.encode('utf-8'),
+            reply_id = message_coordinates.message_id
+        )
+
+        destination_id = meshtastic.BROADCAST_ADDR
         if message_coordinates.is_dm:
-            self.interface.sendText(
-                text,
-                destinationId = message_coordinates.from_id,
-                wantAck=False,
-                wantResponse=False,
-            )
-        else:
-            self.interface.sendText(
-                text,
-                channel_index = message_coordinates.channel_index,
-                wantAck=False,
-                wantResponse=False,
-            )
+            destination_id = message_coordinates.from_id
+
+        self.interface.sendData(
+            data = packet,
+            destinationId = destination_id,
+            portNum = PortNum.TEXT_MESSAGE_APP,
+            wantAck=False,
+            wantResponse=False,
+            channelIndex = message_coordinates.channel_index
+                if message_coordinates.channel_index is None
+                else 0,
+        )
 
     def _event_connect(self, interface: StreamInterface) -> None:
         '''
@@ -85,7 +90,7 @@ class Client:
         '''
         # Suppress unused error
         _ = interface
-        
+
         # my_id = '!' + hex(interface.myInfo.my_node_num)[2:]
         # my_node = interface.nodes[my_id]
         # my_user = my_node['user']

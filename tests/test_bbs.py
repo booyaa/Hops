@@ -28,6 +28,7 @@ class TestHops(unittest.TestCase):
 
     def test_on_bbs_insert(self):
         """
+        Test the insertion of a BBS message and verify the correct storage call.
         """
         self.hops.on_message(
             self.message_coordinates,
