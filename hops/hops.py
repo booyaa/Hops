@@ -112,13 +112,39 @@ class Hops:
 
         self.storage.bbs_insert(
             from_id=coordinates.from_id,
-            from_short_name=get_or_else(
-                coordinates, ["from_node", "user", "shortName"]
-            ),
-            from_long_name=get_or_else(coordinates, ["from_node", "user", "longName"]),
+            from_short_name=get_or_else(coordinates.from_node, ["user", "shortName"]),
+            from_long_name=get_or_else(coordinates.from_node, ["user", "longName"]),
             message=argument,
         )
         client.send_response(message="💾", message_coordinates=coordinates)
+
+    def _on_whoami(
+        self, coordinates: MessageCoordinates, argument: str, client: Client
+    ):
+        _ = argument
+        components = []
+        components.append(MessageCoordinates.num_to_id(coordinates.from_id))
+        if coordinates.from_node is not None:
+            components.append(
+                " ".join(
+                    [
+                        get_or_else(
+                            coordinates.from_node,
+                            ["user", "shortName"],
+                            "Unknown short",
+                        ),
+                        get_or_else(
+                            coordinates.from_node, ["user", "longName"], "Unknown long"
+                        ),
+                    ]
+                )
+            )
+        components.append(f'snr: {get_or_else(coordinates.from_node, ["snr"])}')
+        components.append(f'hops: {get_or_else(coordinates.from_node, ["hops"])}')
+        client.send_response(
+            message="\n".join(components),
+            message_coordinates=coordinates,
+        )
 
     def _on_bbs(self, coordinates: MessageCoordinates, _argument: str, client: Client):
         if self.storage is None:
@@ -126,10 +152,7 @@ class Hops:
             return
 
         if not coordinates.is_dm:
-            client.send_response(
-                message="🚫 Only allowed in DM", message_coordinates=coordinates
-            )
-            return
+            client.send_response(message="📬", message_coordinates=coordinates)
 
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
