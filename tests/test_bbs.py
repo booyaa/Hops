@@ -23,6 +23,7 @@ class TestHops(unittest.TestCase):
             to_node = None,
             message_id = '3',
             channel_index = 0,
+            is_dm = False,
         )
 
     def test_on_bbs_insert(self):
@@ -64,7 +65,7 @@ class TestHops(unittest.TestCase):
             client = self.client,
         )
         self.storage.bbs_read.assert_not_called()
-        self.client.send_text.assert_called_once()
+        self.client.send_response.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()

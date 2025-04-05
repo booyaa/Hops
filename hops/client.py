@@ -5,11 +5,12 @@ the `pubsub` library to subscribe to various Meshtastic events and provides
 callback methods to handle these events, such as connection establishment, data
 reception, node updates, position updates, text messages, and user updates.
 """
+import sys
 import logging
-from typing import Union
-from typing import Optional
+# from typing import Union
+# from typing import Optional
 from pubsub import pub
-import meshtastic
+# import meshtastic
 from meshtastic.stream_interface import StreamInterface
 from .util import get_or_else
 from .message_coordinates import MessageCoordinates
@@ -27,56 +28,70 @@ class Client:
         pub.subscribe(self._event_disconnect, 'meshtastic.connection.lost')
         pub.subscribe(self._event_text,       'meshtastic.receive.text')
 
-    def send_text(
+
+    @staticmethod
+    def num_to_id(num: int) -> str:
+        """
+        Convert the given integer to a meshtastic identifier
+        string.
+        """
+        return '!' + hex(num)[2:]
+
+
+    def send_response(
         self,
         text: str,
-        channel_index: Optional[int],
-        destination_id: Optional[Union[int, str]] = meshtastic.BROADCAST_ADDR,
+        message_coordinates: MessageCoordinates
     ):
         """
         Send a message
         """
-        destination_id = destination_id if destination_id is None else meshtastic.BROADCAST_ADDR
-        destination_id = destination_id if channel_index is None else meshtastic.BROADCAST_ADDR
+        if message_coordinates.is_dm:
+            self.interface.sendText(
+                text,
+                destinationId = message_coordinates.from_id,
+                wantAck=False,
+                wantResponse=False,
+            )
+        else:
+            self.interface.sendText(
+                text,
+                channel_index = message_coordinates.channel_index,
+                wantAck=False,
+                wantResponse=False,
+            )
 
-        self.interface.sendText(
-            text,
-            channelIndex=channel_index if channel_index is not None else 0,
-            destinationId=destination_id,
-            wantAck=False,
-            wantResponse=False,
-        )
-
-    def _event_connect(self, interface):
+    def _event_connect(self, interface: StreamInterface) -> None:
         '''
         Callback function for connection established
-
-        :param interface: Meshtastic interface
-        :param topic:     PubSub topic
         '''
-        # logging.info(
-        #     'Connected to the %s radio on %s hardware',
-        #     self.me["user"]["longName"],
-        #     self.me["user"]["hwModel"]
-        # )
+        # Suppress unused error
+        _ = interface
         logging.info('Connected')
 
-    def _event_disconnect(self, interface, topic=pub.AUTO_TOPIC):
+    def _event_disconnect(self, interface: StreamInterface, topic=pub.AUTO_TOPIC) -> None:
         '''
         Callback function for connection lost
-
-        :param interface: Meshtastic interface
-        :param topic:     PubSub topic
         '''
+        # Suppress unused error
+        _ = interface
+        _ = topic
         logging.warning('Lost connection to radio!')
-        exit()
+        sys.exit()
 
-    def _event_text(self, packet: dict, interface):
+    def _event_text(self, packet: dict, interface: StreamInterface) -> None:
         '''
         Callback function for received packets
-
-        :param packet: Packet received
         '''
+        # Suppress unused error
+        _ = interface
+        
+        # my_id = '!' + hex(interface.myInfo.my_node_num)[2:]
+        # my_node = interface.nodes[my_id]
+        # my_user = my_node['user']
+        # my_short_name = my_user['shortName']
+        # my_long_name = my_user['longName']
+
         coordinates = MessageCoordinates.from_packet(packet, self.interface)
         message = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
         self.hops.on_message(coordinates, message, self)

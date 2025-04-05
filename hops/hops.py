@@ -7,6 +7,7 @@ from typing import Optional
 from .client import Client
 from .storage import Storage
 from .message_coordinates import MessageCoordinates
+from .util import get_or_else
 
 class Hops:
     """
@@ -81,10 +82,9 @@ class Hops:
         """
         Say hello
         """
-        client.send_text(
-            '👋',
-            channel_index = coordinates.channel_index,
-            destination_id = coordinates.from_id
+        client.send_response(
+            text ='👋',
+            message_coordinates = coordinates,
         )
 
     def _on_ping(
@@ -96,10 +96,9 @@ class Hops:
         """
         Respond to a ping
         """
-        client.send_text(
-            'ack',
-            channel_index = coordinates.channel_index,
-            destination_id = coordinates.from_id,
+        client.send_response(
+            text = 'ack',
+            message_coordinates = coordinates,
         )
 
     def _on_help(
@@ -111,10 +110,9 @@ class Hops:
         """
         Provide help info
         """
-        client.send_text(
-            'http://w2asm.com/hops',
-            channel_index = coordinates.channel_index,
-            destination_id = coordinates.from_id
+        client.send_response(
+            text = 'http://w2asm.com/hops',
+            message_coordinates = coordinates,
         )
     
     def _on_bbs(
@@ -129,10 +127,9 @@ class Hops:
         args = parser.parse_args(argument.split() if argument else [])
         
         if args.command == 'help':
-            client.send_text(
-                'http://w2asm.com/hops/bbs/',
-                channel_index=coordinates.channel_index,
-                destination_id=coordinates.from_id
+            client.send_response(
+                text = 'http://w2asm.com/hops/bbs/',
+                message_coordinates = coordinates,
             )
             return
 
@@ -144,8 +141,12 @@ class Hops:
             message = ' '.join(args.message if args.message is not None else [])
             self.storage.bbs_insert(
                 from_id = coordinates.from_id,
-                from_short_name = None,
-                from_long_name = None,
+                from_short_name = get_or_else(
+                    coordinates, ['from_node', 'user', 'shortName']
+                ),
+                from_long_name = get_or_else(
+                    coordinates, ['from_node', 'user', 'longName']
+                ),
                 channel_index = coordinates.channel_index,
                 message = message
             )
@@ -158,8 +159,7 @@ class Hops:
         for row in rows[0:5]:
             from_id = row['from_short_name'] if row['from_short_name'] is not None else row['from_id']
             message = f"{from_id}: {row['message']}"
-            client.send_text(
-                message,
-                channel_index = coordinates.channel_index,
-                destination_id =  from_id,
+            client.send_response(
+                text = message,
+                message_coordinates = coordinates
             )

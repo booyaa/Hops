@@ -24,6 +24,7 @@ class TestHops(unittest.TestCase):
             to_node = None,
             message_id = '3',
             channel_index = 0,
+            is_dm = False,
         )
 
     def test_on_message_hello(self):
@@ -35,10 +36,9 @@ class TestHops(unittest.TestCase):
             message = '.hello',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with(
-            '👋',
-            channel_index = self.message_coordinates.channel_index,
-            destination_id = self.message_coordinates.from_id
+        self.client.send_response.assert_called_once_with(
+            text = '👋',
+            message_coordinates = self.message_coordinates
         )
 
     def test_on_message_hello_synonym(self):
@@ -50,10 +50,9 @@ class TestHops(unittest.TestCase):
             message = '.👋🏼',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with(
-            '👋',
-            channel_index = self.message_coordinates.channel_index,
-            destination_id = self.message_coordinates.from_id
+        self.client.send_response.assert_called_once_with(
+            text = '👋',
+            message_coordinates = self.message_coordinates
         )
 
     def test_on_message_no_prefix(self):
@@ -65,7 +64,7 @@ class TestHops(unittest.TestCase):
             message = 'hello',
             client = self.client,
         )
-        self.client.send_text.assert_not_called()
+        self.client.send_response.assert_not_called()
 
     def test_on_message_unknown_command(self):
         """
@@ -76,7 +75,7 @@ class TestHops(unittest.TestCase):
             message = '.unknown',
             client = self.client,
         )
-        self.client.send_text.assert_not_called()
+        self.client.send_response.assert_not_called()
 
     def test_on_message_non_command(self):
         """
@@ -87,7 +86,7 @@ class TestHops(unittest.TestCase):
             message = 'not a command',
             client = self.client,
         )
-        self.client.send_text.assert_not_called()
+        self.client.send_response.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main()
