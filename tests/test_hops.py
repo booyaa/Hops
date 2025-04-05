@@ -5,13 +5,15 @@ import unittest
 from unittest.mock import MagicMock
 from hops.hops import Hops
 from hops.client import Client
+from hops.storage import Storage
 
 class TestHops(unittest.TestCase):
     """
     Test the Hops class
     """
     def setUp(self):
-        self.hops = Hops()
+        self.storage = MagicMock(spec=Storage)
+        self.hops = Hops(storage=self.storage)
         self.client = MagicMock(spec=Client)
 
     from_id = '1'
@@ -30,7 +32,11 @@ class TestHops(unittest.TestCase):
             message = '.hello',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with('👋', channel_index = self.channel_index, destination_id=self.from_id)
+        self.client.send_text.assert_called_once_with(
+            '👋',
+            channel_index = self.channel_index,
+            destination_id=self.from_id
+        )
 
     def test_on_message_hello_synonym(self):
         """
@@ -43,7 +49,11 @@ class TestHops(unittest.TestCase):
             message = '.👋🏼',
             client = self.client,
         )
-        self.client.send_text.assert_called_once_with('👋', channel_index = self.channel_index, destination_id=self.from_id)
+        self.client.send_text.assert_called_once_with(
+            '👋',
+            channel_index = self.channel_index,
+            destination_id=self.from_id
+        )
 
     def test_on_message_no_prefix(self):
         """

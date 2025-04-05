@@ -91,11 +91,9 @@ class Client:
 
         :param packet: Packet received
         '''
-        sender = get_or_else(packet, ['from'])
+        from_id = get_or_else(packet, ['from'])
         msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
-        # portnum = get_or_else(packet, ['decoded', 'portnum'])
-        # TEXT_MESSAGE_APP
         rx_id = get_or_else(packet, ['id'])
         channel_index = get_or_else(packet, ['channel'], None)
 
-        self.hops.on_message(sender, channel_index, rx_id, msg, self)
+        self.hops.on_message(from_id, channel_index, rx_id, msg, self)

@@ -7,6 +7,7 @@ import time
 from meshtastic.tcp_interface import TCPInterface
 from .client import Client
 from .hops import Hops
+from .storage import Storage
 
 def main():
     """
@@ -19,8 +20,9 @@ def main():
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
+    storage = Storage('./db.sqlite')
     interface = TCPInterface(hostname="192.168.1.66")
-    hops = Hops()
+    hops = Hops(storage)
 
     _ = Client(interface, hops)
     try:
