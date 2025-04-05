@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 from hops.hops import Hops
 from hops.client import Client
 from hops.storage import Storage
+from hops.message_coordinates import MessageCoordinates
 
 class TestHops(unittest.TestCase):
     """
@@ -16,26 +17,28 @@ class TestHops(unittest.TestCase):
         self.hops = Hops(storage=self.storage)
         self.client = MagicMock(spec=Client)
 
-    from_id = '1'
-    to_id = '2'
-    rx_id = '3'
-    channel_index = 0
+        self.message_coordinates = MessageCoordinates(
+            from_id = '1',
+            from_node = None,
+            to_id = '2',
+            to_node = None,
+            message_id = '3',
+            channel_index = 0,
+        )
 
     def test_on_message_hello(self):
         """
         Ensure that the hello message is properly responded to
         """
         self.hops.on_message(
-            from_id = self.from_id,
-            channel_index = self.channel_index,
-            rx_id = self.rx_id,
+            self.message_coordinates,
             message = '.hello',
             client = self.client,
         )
         self.client.send_text.assert_called_once_with(
             '👋',
-            channel_index = self.channel_index,
-            destination_id=self.from_id
+            channel_index = self.message_coordinates.channel_index,
+            destination_id = self.message_coordinates.from_id
         )
 
     def test_on_message_hello_synonym(self):
@@ -43,16 +46,14 @@ class TestHops(unittest.TestCase):
         Ensure that the hello message is properly responded to
         """
         self.hops.on_message(
-            from_id = self.from_id,
-            channel_index = self.channel_index,
-            rx_id = self.rx_id,
+            self.message_coordinates,
             message = '.👋🏼',
             client = self.client,
         )
         self.client.send_text.assert_called_once_with(
             '👋',
-            channel_index = self.channel_index,
-            destination_id=self.from_id
+            channel_index = self.message_coordinates.channel_index,
+            destination_id = self.message_coordinates.from_id
         )
 
     def test_on_message_no_prefix(self):
@@ -60,9 +61,7 @@ class TestHops(unittest.TestCase):
         Ensure that the hello message is properly responded to
         """
         self.hops.on_message(
-            from_id = self.from_id,
-            channel_index = self.channel_index,
-            rx_id = self.rx_id,
+            self.message_coordinates,
             message = 'hello',
             client = self.client,
         )
@@ -73,9 +72,7 @@ class TestHops(unittest.TestCase):
         Ensure that nothing happens for unknown commands
         """
         self.hops.on_message(
-            from_id = self.from_id,
-            channel_index = self.channel_index,
-            rx_id = self.rx_id,
+            self.message_coordinates,
             message = '.unknown',
             client = self.client,
         )
@@ -86,9 +83,7 @@ class TestHops(unittest.TestCase):
         Ensure that nothing happens for unknown commands
         """
         self.hops.on_message(
-            from_id = self.from_id,
-            channel_index = self.channel_index,
-            rx_id = self.rx_id,
+            self.message_coordinates,
             message = 'not a command',
             client = self.client,
         )

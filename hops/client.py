@@ -12,7 +12,7 @@ from pubsub import pub
 import meshtastic
 from meshtastic.stream_interface import StreamInterface
 from .util import get_or_else
-# from .hops import Hops
+from .message_coordinates import MessageCoordinates
 
 class Client:
     """
@@ -23,15 +23,9 @@ class Client:
         self.hops = hops
         self.me = {}
         self.nodes = {}
-
         pub.subscribe(self._event_connect,    'meshtastic.connection.established')
         pub.subscribe(self._event_disconnect, 'meshtastic.connection.lost')
-        pub.subscribe(self._event_node,       'meshtastic.node')
         pub.subscribe(self._event_text,       'meshtastic.receive.text')
-        # pub.subscribe(self._event_position,   'meshtastic.receive.position')
-        # pub.subscribe(self._event_data,       'meshtastic.receive.data.portnum')
-        # pub.subscribe(self._event_user,       'meshtastic.receive.user')
-        # pub.subscribe(self._event_store_forward,       'meshtastic.receive.storeForward')
 
     def send_text(
         self,
@@ -77,23 +71,12 @@ class Client:
         logging.warning('Lost connection to radio!')
         exit()
 
-
-    def _event_node(self, node):
-        '''
-        Callback function for node updates
-
-        :param node: Node information
-        '''
-
     def _event_text(self, packet: dict, interface):
         '''
         Callback function for received packets
 
         :param packet: Packet received
         '''
-        from_id = get_or_else(packet, ['from'])
-        msg = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
-        rx_id = get_or_else(packet, ['id'])
-        channel_index = get_or_else(packet, ['channel'], None)
-
-        self.hops.on_message(from_id, channel_index, rx_id, msg, self)
+        coordinates = MessageCoordinates.from_packet(packet, self.interface)
+        message = get_or_else(packet, ['decoded', 'payload'], '').decode('utf-8')
+        self.hops.on_message(coordinates, message, self)
