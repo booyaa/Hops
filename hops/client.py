@@ -8,6 +8,7 @@ reception, node updates, position updates, text messages, and user updates.
 
 import sys
 import logging
+import emoji
 from pubsub import pub
 import meshtastic
 from meshtastic.stream_interface import StreamInterface
@@ -15,7 +16,6 @@ from meshtastic.protobuf.mesh_pb2 import Data, MeshPacket
 from meshtastic.protobuf.portnums_pb2 import PortNum
 from .util import get_or_else
 from .message_coordinates import MessageCoordinates
-import emoji
 
 
 class Client:
