@@ -32,6 +32,8 @@ class Hops:
         "?": "help",
         "!": "help",
         "🤨": "help",
+        "🏓": "ping",
+        ".": "ping",
     }
 
     def __init__(self, storage: Optional[Storage] = None):
