@@ -26,8 +26,6 @@ class Client:
     def __init__(self, interface: StreamInterface, hops):
         self.interface = interface
         self.hops = hops
-        self.me = {}
-        self.nodes = {}
         pub.subscribe(self._event_connect, "meshtastic.connection.established")
         pub.subscribe(self._event_disconnect, "meshtastic.connection.lost")
         pub.subscribe(self._event_text, "meshtastic.receive.text")
