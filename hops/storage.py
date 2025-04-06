@@ -45,6 +45,12 @@ class Storage:
             )
             cursor.execute(
                 """
+                CREATE INDEX IF NOT EXISTS idx_bbs_timestamp
+                ON bbs (timestamp)
+            """
+            )
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS messages (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp DATETIME UNIQUE NOT NULL,
@@ -55,6 +61,12 @@ class Storage:
                     channel_index INTEGER NOT NULL,
                     message TEXT NOT NULL
                 )
+            """
+            )
+            cursor.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_messages_to_id_timestamp
+                ON messages (to_id, timestamp)
             """
             )
             conn.commit()
@@ -151,7 +163,7 @@ class Storage:
                 INSERT INTO messages
                     (timestamp, from_id, from_short_name, from_long_name, to_id, message)
                 VALUES
-                    (?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?)
             """,
                 (now, from_id, from_short_name, from_long_name, to_id, message),
             )
@@ -182,5 +194,4 @@ class Storage:
             )
             rows = cursor.fetchall()
             columns = [column[0] for column in cursor.description]
-            result = [dict(zip(columns, row)) for row in rows]
-            return result
+            return [dict(zip(columns, row)) for row in rows]

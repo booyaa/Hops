@@ -34,6 +34,7 @@ class Hops:
         "🤨": "help",
         "🏓": "ping",
         ".": "ping",
+        "mail": "messages",
     }
 
     def __init__(self, storage: Optional[Storage] = None):
@@ -101,19 +102,6 @@ class Hops:
             message_coordinates=coordinates,
         )
 
-    def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
-        if self.storage is None:
-            logging.info("Cannot use BBS without storage")
-            return
-
-        self.storage.bbs_insert(
-            from_id=coordinates.from_id,
-            from_short_name=get_or_else(coordinates.from_node, ["user", "shortName"]),
-            from_long_name=get_or_else(coordinates.from_node, ["user", "longName"]),
-            message=argument,
-        )
-        client.send_response(message="💾", message_coordinates=coordinates)
-
     def _on_whoami(
         self, coordinates: MessageCoordinates, argument: str, client: Client
     ):
@@ -142,6 +130,19 @@ class Hops:
             message_coordinates=coordinates,
         )
 
+    def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
+        if self.storage is None:
+            logging.info("Cannot use BBS without storage")
+            return
+
+        self.storage.bbs_insert(
+            from_id=coordinates.from_id,
+            from_short_name=get_or_else(coordinates.from_node, ["user", "shortName"]),
+            from_long_name=get_or_else(coordinates.from_node, ["user", "longName"]),
+            message=argument,
+        )
+        client.send_response(message="📤", message_coordinates=coordinates)
+
     def _on_bbs(self, coordinates: MessageCoordinates, _argument: str, client: Client):
         if self.storage is None:
             logging.info("Cannot use BBS without storage")
@@ -155,6 +156,77 @@ class Hops:
         new_coordinates.message_id = None
 
         rows = self.storage.bbs_read()
+
+        messages = []
+        for row in rows[0:5]:
+            from_id = (
+                row["from_short_name"]
+                if row["from_short_name"] is not None
+                else row["from_id"]
+            )
+            messages.append(f"{from_id}: {row['message']}")
+
+        # Group the messages together into as few messages as possible
+        concatenated_messages = []
+        current_message = ""
+        for message in messages:
+            if len(current_message) + len(message) + 1 <= 200:
+                current_message += f"\n{message}" if current_message else message
+            else:
+                concatenated_messages.append(current_message)
+                current_message = message
+
+        if current_message:
+            concatenated_messages.append(current_message)
+
+        for message in concatenated_messages:
+            client.send_response(message=message, message_coordinates=new_coordinates)
+
+    def _on_message(
+        self, coordinates: MessageCoordinates, argument: str, client: Client
+    ):
+        if self.storage is None:
+            logging.info("Cannot use Messages without storage")
+            return
+
+        split = argument.split(" ", 1)
+        to_name = split[0]
+        message = split[1] if len(split) > 1 else ""
+
+        to_id = None
+        for node in client.interface.nodes.values():
+            if node["shortName"] == to_name or node["longName"] == to_name:
+                to_id = node["id"]
+                break
+
+        if to_id is None:
+            client.send_response(message="❌", message_coordinates=coordinates)
+            return
+
+        self.storage.message_insert(
+            from_id=coordinates.from_id,
+            from_short_name=get_or_else(coordinates.from_node, ["user", "shortName"]),
+            from_long_name=get_or_else(coordinates.from_node, ["user", "longName"]),
+            to_id=to_id,
+            message=message,
+        )
+        client.send_response(message="📤", message_coordinates=coordinates)
+
+    def _on_messages(
+        self, coordinates: MessageCoordinates, _argument: str, client: Client
+    ):
+        if self.storage is None:
+            logging.info("Cannot use Messages without storage")
+            return
+
+        if not coordinates.is_dm:
+            client.send_response(message="📬", message_coordinates=coordinates)
+
+        new_coordinates = copy.deepcopy(coordinates)
+        new_coordinates.is_dm = True
+        new_coordinates.message_id = None
+
+        rows = self.storage.messages_read(coordinates.to_id)
 
         messages = []
         for row in rows[0:5]:
