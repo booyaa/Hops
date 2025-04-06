@@ -7,6 +7,7 @@ reception, node updates, position updates, text messages, and user updates.
 """
 
 import sys
+import json
 import logging
 import emoji
 from pubsub import pub
@@ -14,7 +15,8 @@ import meshtastic
 from meshtastic.stream_interface import StreamInterface
 from meshtastic.protobuf.mesh_pb2 import Data, MeshPacket
 from meshtastic.protobuf.portnums_pb2 import PortNum
-from .util import get_or_else
+from .util import get_or_else, flat_dict
+from .storage import Storage
 from .message_coordinates import MessageCoordinates
 
 
@@ -23,12 +25,33 @@ class Client:
     Meshtastic bot
     """
 
-    def __init__(self, interface: StreamInterface, hops):
+    def __init__(self, interface: StreamInterface, hops, storage: Storage):
         self.interface = interface
         self.hops = hops
+        self.storage = storage
         pub.subscribe(self._event_connect, "meshtastic.connection.established")
         pub.subscribe(self._event_disconnect, "meshtastic.connection.lost")
         pub.subscribe(self._event_text, "meshtastic.receive.text")
+
+        events = {
+            # "meshtastic.connection.established",
+            # "meshtastic.connection.lost",
+            # "meshtastic.log.line",
+            # "meshtastic.mqttclientproxymessage",
+            # "meshtastic.node",
+            # "meshtastic.node.updated",
+            "meshtastic.receive": self._log_packet,
+            "meshtastic.receive.data": self._log_packet,
+            "meshtastic.receive.data.IP_TUNNEL_APP": self._log_packet,
+            "meshtastic.receive.position": self._log_packet,
+            "meshtastic.receive.powerstress": self._log_packet,
+            "meshtastic.receive.remotehw": self._log_packet,
+            "meshtastic.receive.text": self._log_packet,
+            "meshtastic.receive.user": self._log_packet,
+            # "meshtastic.xmodempacket",
+        }
+        for event, handler in events.items():
+            pub.subscribe(handler, event)
 
     def send_response(self, message: str, message_coordinates: MessageCoordinates):
         """
@@ -100,3 +123,9 @@ class Client:
         coordinates = MessageCoordinates.from_packet(packet, self.interface)
         message = get_or_else(packet, ["decoded", "payload"], "").decode("utf-8")
         self.hops.on_message(coordinates, message, self)
+
+    def _log_packet(self, packet: dict, interface: StreamInterface) -> None:
+        _ = interface
+        if self.storage is not None:
+            flat_json_packet = json.dumps(flat_dict(packet), indent=3)
+            self.storage.log_packet(flat_json_packet)

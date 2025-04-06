@@ -24,12 +24,10 @@ class Storage:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS log_received (
+                CREATE TABLE IF NOT EXISTS packets (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp DATETIME UNIQUE NOT NULL,
-                    from_id TEXT NOT NULL,
-                    channel_index INTEGER NOT NULL,
-                    message TEXT NOT NULL
+                    packet_json TEXT NOT NULL
                 )
             """
             )
@@ -61,26 +59,21 @@ class Storage:
             )
             conn.commit()
 
-    def log_received(self, from_id: str, channel_index: Optional[int], message: str):
+    def log_packet(self, packet_json: str):
         """
-        Log a received message
+        Log a received packet
         """
         now = datetime.now().isoformat()
         with sqlite3.connect(self.db_filename) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO log_received
-                    (timestamp, from_id, channel_index, message)
+                INSERT INTO packets
+                    (timestamp, packet_json)
                 VALUES
-                    (?, ?, ?, ?)
+                    (?, ?)
             """,
-                (
-                    now,
-                    from_id,
-                    channel_index if channel_index is not None else 0,
-                    message,
-                ),
+                (now, packet_json),
             )
             conn.commit()
 

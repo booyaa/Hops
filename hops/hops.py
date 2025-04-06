@@ -46,12 +46,6 @@ class Hops:
         """
         Handler for incoming messages
         """
-
-        if self.storage is not None:
-            self.storage.log_received(
-                coordinates.from_id, coordinates.channel_index, message
-            )
-
         split = message.split(" ", 1)
 
         command = split[0]

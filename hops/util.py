@@ -25,3 +25,20 @@ def num_to_id(num: int) -> str:
     string.
     """
     return "!" + hex(num)[2:]
+
+
+def is_non_primitive(val):
+    return not isinstance(val, (int, float, str, bool, type(None)))
+
+
+def flat_dict(d, parent_key="", sep="."):
+    items = {}
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.update(flat_dict(v, new_key, sep))
+        if is_non_primitive(v):
+            continue
+        else:
+            items[new_key] = v
+    return items
