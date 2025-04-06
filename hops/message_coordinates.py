@@ -15,7 +15,7 @@ Methods:
 from typing import Union
 from typing import Optional
 from meshtastic.stream_interface import StreamInterface
-from .util import get_or_else
+from .util import get_or_else, num_to_id
 
 
 class MessageCoordinates:
@@ -43,14 +43,6 @@ class MessageCoordinates:
         self.is_dm = is_dm
 
     @staticmethod
-    def num_to_id(num: int) -> str:
-        """
-        Convert the given integer to a meshtastic identifier
-        string.
-        """
-        return "!" + hex(num)[2:]
-
-    @staticmethod
     def from_packet(packet: dict, interface: StreamInterface) -> "MessageCoordinates":
         """
         Create a Coordinates instance from a packet dictionary.
@@ -63,8 +55,8 @@ class MessageCoordinates:
         message_id = get_or_else(packet, ["id"])
         channel_index = get_or_else(packet, ["channel"], None)
 
-        from_id_str = MessageCoordinates.num_to_id(from_id)
-        to_id_str = MessageCoordinates.num_to_id(to_id)
+        from_id_str = num_to_id(from_id)
+        to_id_str = num_to_id(to_id)
 
         from_node = (
             interface.nodes[from_id_str] if from_id_str in interface.nodes else None

@@ -10,7 +10,7 @@ from typing import Optional
 from .client import Client
 from .storage import Storage
 from .message_coordinates import MessageCoordinates
-from .util import get_or_else
+from .util import get_or_else, num_to_id
 
 
 class Hops:
@@ -123,7 +123,7 @@ class Hops:
     ):
         _ = argument
         components = []
-        components.append(MessageCoordinates.num_to_id(coordinates.from_id))
+        components.append(num_to_id(coordinates.from_id))
         if coordinates.from_node is not None:
             components.append(
                 " ".join(
