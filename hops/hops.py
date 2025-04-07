@@ -193,13 +193,16 @@ class Hops:
         to_name = split[0]
         message = split[1] if len(split) > 1 else ""
 
+        to_name = to_name.lower()
         to_id = None
         for node in client.interface.nodes.values():
             if "user" not in node:
                 continue
+            short = get_or_else(node["user"], ["shortName"])
+            long = get_or_else(node["user"], ["longName"])
             if (
-                get_or_else(node["user"], ["shortName"]) == to_name
-                or get_or_else(node["user"], ["longName"]) == to_name
+                (short is not None and short.lower() == to_name)
+                or (long is not None and long.lower() == to_name)
             ):
                 to_id = get_or_else(node["user"], ["id"])
                 break
