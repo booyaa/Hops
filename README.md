@@ -17,10 +17,10 @@ Sends a short ack.
 Say hello!
 _Synonyms_:.👋🏼
 
-### .message <user> <message>
+#### .message <user> <message>
 Send a message to a user. The user can be specified by their short or long name.
 
-### .mail
+#### .mail
 Retrieve your most recent 5 mail messages.
 
 #### .post Your message for the BBS
