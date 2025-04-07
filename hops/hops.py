@@ -200,9 +200,8 @@ class Hops:
                 continue
             short = get_or_else(node["user"], ["shortName"])
             long = get_or_else(node["user"], ["longName"])
-            if (
-                (short is not None and short.lower() == to_name)
-                or (long is not None and long.lower() == to_name)
+            if (short is not None and short.lower() == to_name) or (
+                long is not None and long.lower() == to_name
             ):
                 to_id = get_or_else(node["user"], ["id"])
                 break
