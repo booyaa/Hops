@@ -195,15 +195,20 @@ class Hops:
 
         to_id = None
         for node in client.interface.nodes.values():
-            if node["shortName"] == to_name or node["longName"] == to_name:
-                to_id = node["id"]
+            if "user" not in node:
+                continue
+            if (
+                get_or_else(node["user"], ["shortName"]) == to_name
+                or get_or_else(node["user"], ["longName"]) == to_name
+            ):
+                to_id = get_or_else(node["user"], ["id"])
                 break
 
         if to_id is None:
             client.send_response(message="❌", message_coordinates=coordinates)
             return
 
-        self.storage.message_insert(
+        self.storage.messages_insert(
             from_id=coordinates.from_id,
             from_short_name=get_or_else(coordinates.from_node, ["user", "shortName"]),
             from_long_name=get_or_else(coordinates.from_node, ["user", "longName"]),
@@ -219,14 +224,16 @@ class Hops:
             logging.info("Cannot use Messages without storage")
             return
 
+        rows = self.storage.messages_read(coordinates.to_id)
+        if len(rows) == 0:
+            client.send_response(message="📭", message_coordinates=coordinates)
+
         if not coordinates.is_dm:
             client.send_response(message="📬", message_coordinates=coordinates)
 
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
         new_coordinates.message_id = None
-
-        rows = self.storage.messages_read(coordinates.to_id)
 
         messages = []
         for row in rows[0:5]:

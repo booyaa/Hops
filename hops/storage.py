@@ -58,7 +58,6 @@ class Storage:
                     from_short_name TEXT,
                     from_long_name TEXT,
                     to_id TEXT NOT NULL,
-                    channel_index INTEGER NOT NULL,
                     message TEXT NOT NULL
                 )
             """

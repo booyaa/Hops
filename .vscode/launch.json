@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": "--verbose"
+            "args": "--verbose --tcp 192.168.1.66 --db db.sqlite"
         }
     ]
 }
