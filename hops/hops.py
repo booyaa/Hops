@@ -224,7 +224,7 @@ class Hops:
             logging.info("Cannot use Messages without storage")
             return
 
-        rows = self.storage.messages_read(coordinates.to_id)
+        rows = self.storage.messages_read(num_to_id(coordinates.from_id))
         if len(rows) == 0:
             client.send_response(message="📭", message_coordinates=coordinates)
 
