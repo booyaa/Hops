@@ -34,7 +34,7 @@ class Client:
         pub.subscribe(self._event_text, "meshtastic.receive.text")
 
         events = {
-            # "meshtastic.connection.established",
+            "meshtastic.connection.established": self._log_nodes,
             # "meshtastic.connection.lost",
             # "meshtastic.log.line",
             # "meshtastic.mqttclientproxymessage",
@@ -129,3 +129,8 @@ class Client:
         if self.storage is not None:
             flat_json_packet = json.dumps(flat_dict(packet), indent=3)
             self.storage.log_packet(flat_json_packet)
+
+    def _log_nodes(self, interface: StreamInterface) -> None:
+        for node_id, node in interface.nodes.items():
+            flat_json_node = json.dumps(flat_dict(node), indent=3)
+            self.storage.log_node(node_id, flat_json_node)

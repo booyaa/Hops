@@ -217,7 +217,13 @@ class Hops:
             to_id=to_id,
             message=message,
         )
+
         client.send_response(message="📤", message_coordinates=coordinates)
+
+        # Notify the addressee
+        # client.send_response(message="📫", message_coordinates=dm_coordinates)
+
+        
 
     def _on_messages(
         self, coordinates: MessageCoordinates, _argument: str, client: Client

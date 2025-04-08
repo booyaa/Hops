@@ -33,6 +33,16 @@ class Storage:
             )
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS nodes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME UNIQUE NOT NULL,
+                    node_id TEXT NOT NULL,
+                    node_json TEXT NOT NULL
+                )
+            """
+            )
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS bbs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp DATETIME UNIQUE NOT NULL,
@@ -85,6 +95,21 @@ class Storage:
                     (?, ?)
             """,
                 (now, packet_json),
+            )
+            conn.commit()
+
+    def log_node(self, node_id: str, node_json: str):
+        now = datetime.now().isoformat()
+        with sqlite3.connect(self.db_filename) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO nodes
+                    (timestamp, node_id, node_json)
+                VALUES
+                    (?, ?, ?)
+            """,
+                (now, node_id, node_json),
             )
             conn.commit()
 
