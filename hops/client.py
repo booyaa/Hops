@@ -111,7 +111,7 @@ class Client:
         _ = interface
         _ = topic
         logging.warning("Lost connection to radio!")
-        sys.exit()
+        sys.exit(0)
 
     def _event_text(self, packet: dict, interface: StreamInterface) -> None:
         """
