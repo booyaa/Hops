@@ -74,3 +74,16 @@ class MessageCoordinates:
             channel_index,
             is_dm,
         )
+
+    @staticmethod
+    def from_addresses(
+        to_id: str, from_id: str, channel_index: int, interface: StreamInterface
+    ) -> "MessageCoordinates":
+        return MessageCoordinates(
+            from_id=from_id,
+            from_node=interface.nodes[from_id] if from_id in interface.nodes else None,
+            to_id=to_id,
+            to_node=interface.nodes[to_id] if to_id in interface.nodes else None,
+            message_id=None,
+            channel_index=channel_index,
+        )
