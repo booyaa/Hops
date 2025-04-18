@@ -86,4 +86,5 @@ class MessageCoordinates:
             to_node=interface.nodes[to_id] if to_id in interface.nodes else None,
             message_id=None,
             channel_index=channel_index,
+            is_dm=True,
         )
