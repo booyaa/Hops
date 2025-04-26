@@ -8,3 +8,5 @@ version = "0.1.0"
 description = "Your project description here"
 authors = [{name = "Andrew Morrison", email = "asm@w2asm.com"}]
 
+[project.scripts]
+hops = "hops.cli:main"
