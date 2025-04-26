@@ -1,4 +1,5 @@
 setuptools
+wheel
 meshtastic
 black
 emoji
