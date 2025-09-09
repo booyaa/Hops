@@ -1,9 +1,58 @@
-# 🐇 Hops
+# 🐇 Hops plus Tools
 
 Hops is a [Meshtastic](https://meshtastic.org/) bot that responds to dot commands.
 
+> [!INFO]
+> This is a fork to add some command line tools to manage the database.
+
+## Tools
+
+### List BBS messages
+
+```sh
+barley bbs list
+
+id|timestamp|from_id|from_short_name|from_long_name|message
+1|2025-07-29T17:40:47.122722|nnn|😀|George|Welcome to the East Anglian Notice Board
+2|2025-07-29T17:41:13.002919|nnn|😀|George|Now was your hands
+```
+
+### Post BBS message
+
+```sh
+barley bbs post "your message"
+
+Post added (id: 3)
+```
+
+### Delete BBS message
+
+```sh
+barley bbs delete 3
+
+Post deleted
+```
+
+### Search Nodes
+
+```sh
+barley nodedb search "needle" # will search for "needle" in longname, shortname and hardware
+```
+
+### Last Seen Node
+
+```sh
+barley nodedb lastseen 12345 # search for node by node number
+```
+
+### List Nodes
+
+```sh
+barley nodedb list # list nodes compactly
+```
 
 ## Commands
+
 #### .help
 Get information on the bot (sends you here) Synonyms:.info, .?
 
