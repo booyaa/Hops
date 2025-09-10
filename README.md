@@ -83,14 +83,14 @@ List the most recent 5 BBS messages
 Start by cloning the repository and setting up a virtual environment:
 
 ```sh
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+uv venv
+source .venv/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
 
 Then, install the required packages:
 
 ```sh
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 Then, you can run the bot using the following command:
@@ -108,7 +108,7 @@ python -m unittest discover
 You can install the bot via
 
 ```sh
-pip install .
+uv pip install .
 ```
 
 and once installed run it via
@@ -138,3 +138,7 @@ By default hops will create a sqlite database `db.sqlite` in the current directo
 ```sh
 hops --serial --db /path/to/db.sqlite
 ```
+
+## Acknowledgements
+
+- Borrowed service and launch script from SudGunMan's excellent [meshing-around](https://github.com/SpudGunMan/meshing-around/).

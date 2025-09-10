@@ -1,0 +1,27 @@
+# /etc/systemd/system/hops_bot.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable hops_bot.service
+# sudo systemctl start hops_bot.service
+
+[Unit]
+Description=Hops bot
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/dir/
+ExecStart=python3 hops_bot.py
+ExecStop=pkill -f hops_bot.py
+
+# Disable Python's buffering of STDOUT and STDERR, so that output from the
+# service shows up immediately in systemd's logs
+Environment=PYTHONUNBUFFERED=1
+Envronment=HOPS_ADMIN_ID='!SETME'
+
+Restart=on-failure
+Type=notify #try simple if any problems
+
+[Install]
+WantedBy=default.target
