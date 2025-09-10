@@ -14,10 +14,10 @@ else
 fi
 
 # launch the application
-if [[ "$1" == hops* ]]; then
-    python3 Hops.py --serial
+if [[ "$1" == main* ]]; then
+    python3 main.py --serial
 else
-    echo "Unknown application, try "hops" instead"
+    echo "Unknown application, try "main" instead"
     exit 1
 fi
 
