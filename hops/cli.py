@@ -35,6 +35,8 @@ def main():
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     storage = None
     if args.db is not None:
