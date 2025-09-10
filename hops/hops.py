@@ -11,8 +11,9 @@ from .client import Client
 from .storage import Storage
 from .message_coordinates import MessageCoordinates
 from .util import get_or_else, num_to_id
-import os
 
+import os
+import subprocess
 
 class Hops:
     """
@@ -43,9 +44,7 @@ class Hops:
     if "HOPS_ADMIN_ID" in os.environ:
         try:
             admin_user_id = os.environ["HOPS_ADMIN_ID"]
-            logging.info(f"admin_user_id = {admin_user_id}")
             test_as_valid_node_num = int(admin_user_id.replace("!",""), 16)
-            logging.info(f"test_as_valid_node_num = {test_as_valid_node_num}")
         except ValueError:
             logging.warning("HOPS_ADMIN_ID is missing or invalid")
 
@@ -150,7 +149,6 @@ class Hops:
             logging.warning("Unauthorized status request from %s", coordinates.from_id)
             return
 
-        import subprocess
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
         components.append(f"uptime: {uptime}")
         logging.info("Uptime: %s", uptime)
@@ -173,8 +171,29 @@ class Hops:
 
         client.send_response(
             message="\n".join(components),
-            message_coordinates=coordinates,
+            message_coordinates=new_coordinates,
         )
+
+    def _on_shutdown(
+        self, coordinates: MessageCoordinates, argument: str, client: Client
+    ):
+        _ = argument
+        components = ["Shutting down..."]
+
+        if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
+            logging.warning("Unauthorized shutdown request from %s", coordinates.from_id)
+            return
+
+        # only send as DM
+        new_coordinates = copy.deepcopy(coordinates)
+        new_coordinates.is_dm = True
+        new_coordinates.message_id = None
+
+        client.send_response(
+            message="\n".join(components),
+            message_coordinates=new_coordinates,
+        )
+        subprocess.Popen(["sudo", "shutdown", "-h", "now"])
 
     def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
         if self.storage is None:
