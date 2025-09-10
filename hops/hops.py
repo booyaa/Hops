@@ -11,6 +11,7 @@ from .client import Client
 from .storage import Storage
 from .message_coordinates import MessageCoordinates
 from .util import get_or_else, num_to_id
+import os
 
 
 class Hops:
@@ -36,6 +37,15 @@ class Hops:
         ".": "ping",
         "mail": "messages",
     }
+
+    # get value from environment variable HOPS_ADMIN_ID
+    admin_user_id = None
+    if "HOPS_ADMIN_ID" in os.environ:
+        try:
+            admin_user_id = int(os.environ["HOPS_ADMIN_ID"])
+            test_as_valid_node_num = int(str(admin_user_id), 16)
+        except ValueError:
+            logging.warning("HOPS_ADMIN_ID is missing or invalid")
 
     def __init__(self, storage: Optional[Storage] = None):
         """
@@ -134,6 +144,10 @@ class Hops:
         _ = argument
         components = []
 
+        if self.admin_id is None or num_to_id(coordinates.from_id) != self.admin_id:
+            logging.warning("Unauthorized status request from %s", coordinates.from_id)
+            return
+
         import subprocess
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
         components.append(f"uptime: {uptime}")
@@ -144,16 +158,13 @@ class Hops:
         components.append(f"ip: {ip_addresses[0]}")
         logging.info("IP: %s", ip_addresses[0])
 
-        # get load average of system and store in load_avg
         load_avg = subprocess.check_output(["cat", "/proc/loadavg"]).decode("utf-8").strip()
         load_avg = load_avg.split(" ")[0:3]
         load_avg = ", ".join(load_avg)
         components.append(f"load: {load_avg}")
         logging.info("Load average: %s", load_avg)
 
-        if not coordinates.is_dm:
-            pass # do not acknowledge in public
-
+        # only send as DM
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
         new_coordinates.message_id = None
