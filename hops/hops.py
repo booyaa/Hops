@@ -43,8 +43,9 @@ class Hops:
     if "HOPS_ADMIN_ID" in os.environ:
         try:
             admin_user_id = os.environ["HOPS_ADMIN_ID"]
-            test_as_valid_node_num = int(str(admin_user_id), 16)
-            logging.info(f"admin_user_id = {admin_user_id} / test_as_valid_node_num = {test_as_valid_node_num}")
+            logging.info(f"admin_user_id = {admin_user_id}")
+            test_as_valid_node_num = int(admin_user_id.replace("!",""), 16)
+            logging.info(f"test_as_valid_node_num = {test_as_valid_node_num}")
         except ValueError:
             logging.warning("HOPS_ADMIN_ID is missing or invalid")
 
