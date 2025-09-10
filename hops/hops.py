@@ -98,7 +98,7 @@ class Hops:
         Provide help info
         """
         client.send_response(
-            message="http://w2asm.com/hops",
+            message="https://github.com/booyaa/Hops/blob/main/HELP.md",
             message_coordinates=coordinates,
         )
 
