@@ -5,7 +5,7 @@ Hops is a [Meshtastic](https://meshtastic.org/) bot that responds to dot command
 > [!INFO]
 > This is a fork to add some command line tools to manage the database.
 
-## Tools
+## WIP: Tools
 
 ### List BBS messages
 
@@ -51,7 +51,7 @@ barley nodedb lastseen 12345 # search for node by node number
 barley nodedb list # list nodes compactly
 ```
 
-## Commands
+## Bot commands
 
 #### .help
 Get information on the bot (sends you here) Synonyms:.info, .?
@@ -84,7 +84,7 @@ Start by cloning the repository and setting up a virtual environment:
 
 ```sh
 uv venv
-source .venv/bin/activate  # On Windows use `venv\Scripts\activate`
+source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
 ```
 
 Then, install the required packages:
@@ -139,6 +139,38 @@ By default hops will create a sqlite database `db.sqlite` in the current directo
 hops --serial --db /path/to/db.sqlite
 ```
 
-## Acknowledgements
+### WIP: Install as a service
+
+- cp hops.service.template hop.service.template
+- update the new service file FIXME: create install script
+  - Service: user, group, working directory
+  - Set HOPS_ADMIN_ID to your own node id (hex, not integer)
+
+```sh
+sudo cp hops.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable hops.service
+sudo systemctl start hops.service
+```
+
+If this fails troublshoot by checking
+
+```sh
+sudo systemctl status hops.service
+
+# alternatively tail service logs
+journalctl -fxeu hops.service
+```
+
+If you need to fix the service and have made updates to your local service file
+
+
+```sh
+sudo systemctl disable hops.service # stop service and remove syslink
+sudo cp hops.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable hops.service
+sudo systemctl start hops.service
+```
 
 - Borrowed service and launch script from SudGunMan's excellent [meshing-around](https://github.com/SpudGunMan/meshing-around/).
