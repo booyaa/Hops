@@ -144,7 +144,7 @@ class Hops:
         _ = argument
         components = []
 
-        if self.admin_id is None or num_to_id(coordinates.from_id) != self.admin_id:
+        if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
             logging.warning("Unauthorized status request from %s", coordinates.from_id)
             return
 
