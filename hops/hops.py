@@ -130,6 +130,39 @@ class Hops:
             message_coordinates=coordinates,
         )
 
+    def _on_status(self, coordinates: MessageCoordinates, argument: str, client: Client):
+        _ = argument
+        components = []
+
+        import subprocess
+        uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
+        components.append(f"uptime: {uptime}")
+        logging.info("Uptime: %s", uptime)
+
+        ip_addresses = subprocess.check_output(["hostname", "-I"]).decode("utf-8").strip()
+        ip_addresses = ip_addresses.split(" ")
+        components.append(f"ip: {ip_addresses[0]}")
+        logging.info("IP: %s", ip_addresses[0])
+
+        # get load average of system and store in load_avg
+        load_avg = subprocess.check_output(["cat", "/proc/loadavg"]).decode("utf-8").strip()
+        load_avg = load_avg.split(" ")[0:3]
+        load_avg = ", ".join(load_avg)
+        components.append(f"load: {load_avg}")
+        logging.info("Load average: %s", load_avg)
+
+        if not coordinates.is_dm:
+            pass # do not acknowledge in public
+
+        new_coordinates = copy.deepcopy(coordinates)
+        new_coordinates.is_dm = True
+        new_coordinates.message_id = None
+
+        client.send_response(
+            message="\n".join(components),
+            message_coordinates=coordinates,
+        )
+
     def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
         if self.storage is None:
             logging.info("Cannot use BBS without storage")
