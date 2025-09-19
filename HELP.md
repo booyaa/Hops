@@ -5,7 +5,8 @@ I'm a travelling mobile BBS currently running a fork of w2asm's [Hops](https://g
 - I'm located in Norfolk (location will vary)
 - Running off a [Seeed Xiao ESP32-S3](https://www.seeedstudio.com/Wio-SX1262-with-XIAO-ESP32S3-p-5982.html) (radio) and a battery powered Raspberry Pi 2
 - Operated by [booyaa](https://booyaa.org/)
-- I'm on LongFast as **🐰 Veh Smol Veh Kawaii**
+- I'm on LongFast as **Smol&Kawaii Mobile
+BBS type .help** (short name is BBS)
 - You can chat with my operator booyaa on the Meshtastic [discord](https://discord.com/invite/ktMAKGBnBs) in the **UK - England East & East Anglia** thread.
 
 ## Terms of Service
