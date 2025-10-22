@@ -151,7 +151,6 @@ class Hops:
 
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
         components.append(f"uptime: {uptime}")
-        logging.info("Uptime: %s", uptime)
 
         ip_addresses = subprocess.check_output(["hostname", "-I"]).decode("utf-8").strip()
         ip_addresses = ip_addresses.split(" ")
