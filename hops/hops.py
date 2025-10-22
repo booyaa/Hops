@@ -193,7 +193,7 @@ class Hops:
         new_coordinates.message_id = None
 
 
-        shutdown_args = ["-h", "now"] if len(argument) == 0 else str(argument).split(" ")
+        shutdown_args = ["-h", "now"] if len(str(argument)) == 0 else str(argument).split(" ")
         shutdown_command = ["sudo", "shutdown"] + shutdown_args
         components.append(f"...executing: {shutdown_command}")
         logging.info(components)
