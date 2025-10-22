@@ -155,15 +155,18 @@ class Hops:
 
         ip_addresses = subprocess.check_output(["hostname", "-I"]).decode("utf-8").strip()
         ip_addresses = ip_addresses.split(" ")
-        components.append(f"ip: {ip_addresses[0]}")
-        logging.info("IP: %s", ip_addresses[0])
+        ip_address = ip_addresses[0] if len(ip_addresses) > 0 else "N/A"
+        components.append(f"ip: {ip_address}")
 
         load_avg = subprocess.check_output(["cat", "/proc/loadavg"]).decode("utf-8").strip()
         load_avg = load_avg.split(" ")[0:3]
         load_avg = ", ".join(load_avg)
         components.append(f"load: {load_avg}")
-        logging.info("Load average: %s", load_avg)
 
+        battery_info = subprocess.check_output(["./battery_meter"]).decode("utf-8").strip()
+        components.append(f"battery: {battery_info} %")
+
+        logging.info(components)
         # only send as DM
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
