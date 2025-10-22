@@ -149,8 +149,6 @@ class Hops:
             logging.warning("Unauthorized status request from %s", coordinates.from_id)
             return
 
-        logging.info(f"coordinates: {coordinates}")
-
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
         components.append(f"uptime: {uptime}")
 
@@ -177,6 +175,7 @@ class Hops:
         client.send_response(
             message="\n".join(components),
             message_coordinates=new_coordinates,
+
         )
 
     def _on_shutdown(
@@ -185,11 +184,18 @@ class Hops:
         _ = argument
         components = ["Shutting down..."]
 
-        logging.info(f"coordinates: {coordinates}")
+        logging.info(f"channel index: {coordinates.channel_index}")
 
         if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
             logging.warning("Unauthorized shutdown request from %s", coordinates.from_id)
             return
+
+        public_coordinates = copy.deepcopy(coordinates)
+        public_coordinates.channel_index = 0 # FIXME: this could be done better or extracted as a config parameter
+        client.send_response(
+            message="Admin request received, shutting down...",
+            message_coordinates=public_coordinates,
+        )
 
         # only send details as DM
         new_coordinates = copy.deepcopy(coordinates)
