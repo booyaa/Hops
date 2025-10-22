@@ -192,13 +192,17 @@ class Hops:
         new_coordinates.is_dm = True
         new_coordinates.message_id = None
 
+
+        shutdown_args = ["-h", "now"] if len(argument) == 0 else str(argument).split(" ")
+        shutdown_command = ["sudo", "shutdown"] + shutdown_args
+        components.append(f"...executing: {shutdown_command}")
+        logging.info(components)
+
         client.send_response(
             message="\n".join(components),
             message_coordinates=new_coordinates,
         )
-        shutdown_args = ["-h", "now"] if len(argument) == 0 else str(argument).split(" ")
-        shutdown_command = ["sudo", "shutdown"] + shutdown_args
-        logging.info("Executing shutdown command: %s", " ".join(shutdown_command))
+
         subprocess.Popen(shutdown_command)
 
     def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
