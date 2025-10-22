@@ -183,15 +183,16 @@ class Hops:
         _ = argument
         components = ["Shutting down..."]
 
+        logging.info(f"coordinates: {coordinates}")
+
         if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
             logging.warning("Unauthorized shutdown request from %s", coordinates.from_id)
             return
 
-        # only send as DM
+        # only send details as DM
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
         new_coordinates.message_id = None
-
 
         shutdown_args = ["-h", "now"] if argument is None else str(argument).split(" ")
         shutdown_command = ["sudo", "shutdown"] + shutdown_args
