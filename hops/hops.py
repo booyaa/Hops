@@ -166,6 +166,7 @@ class Hops:
         components.append(f"battery: {battery_info} %")
 
         logging.info(components)
+
         # only send as DM
         new_coordinates = copy.deepcopy(coordinates)
         new_coordinates.is_dm = True
@@ -195,7 +196,10 @@ class Hops:
             message="\n".join(components),
             message_coordinates=new_coordinates,
         )
-        subprocess.Popen(["sudo", "shutdown", "-h", "now"])
+        shutdown_args = ["-h", "now"] if len(argument) == 0 else str(argument).split(" ")
+        shutdown_command = ["sudo", "shutdown"] + shutdown_args
+        logging.info("Executing shutdown command: %s", " ".join(shutdown_command))
+        subprocess.Popen(shutdown_command)
 
     def _on_post(self, coordinates: MessageCoordinates, argument: str, client: Client):
         if self.storage is None:
