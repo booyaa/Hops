@@ -149,6 +149,8 @@ class Hops:
             logging.warning("Unauthorized status request from %s", coordinates.from_id)
             return
 
+        logging.info(f"coordinates: {coordinates}")
+
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
         components.append(f"uptime: {uptime}")
 
