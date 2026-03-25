@@ -145,8 +145,9 @@ class Hops:
         _ = argument
         components = []
 
-        if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
-            logging.warning("Unauthorized status request from %s", coordinates.from_id)
+        id = num_to_id(coordinates.from_id)
+        if self.admin_user_id is None or id != self.admin_user_id:
+            logging.warning(f"Unauthorized status request from {id} ({coordinates.from_id})")
             return
 
         uptime = subprocess.check_output(["uptime", "-p"]).decode("utf-8").strip()
@@ -162,8 +163,8 @@ class Hops:
         load_avg = ", ".join(load_avg)
         components.append(f"load: {load_avg}")
 
-        battery_info = subprocess.check_output(["./battery_meter"]).decode("utf-8").strip()
-        components.append(f"battery: {battery_info} %")
+        #battery_info = subprocess.check_output(["./battery_meter"]).decode("utf-8").strip()
+        #components.append(f"battery: {battery_info} %")
 
         logging.info(components)
 
@@ -186,8 +187,10 @@ class Hops:
 
         logging.info(f"channel index: {coordinates.channel_index}")
 
-        if self.admin_user_id is None or num_to_id(coordinates.from_id) != self.admin_user_id:
-            logging.warning("Unauthorized shutdown request from %s", coordinates.from_id)
+
+        id = num_to_id(coordinates.from_id)
+        if self.admin_user_id is None or id != self.admin_user_id:
+            logging.warning(f"Unauthorized shutdown request from {id} ({coordinates.from_id})")
             return
 
         public_coordinates = copy.deepcopy(coordinates)
