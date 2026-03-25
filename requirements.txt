@@ -3,3 +3,4 @@ wheel
 meshtastic
 black
 emoji
+protobuf==6.33.0
